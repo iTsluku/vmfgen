@@ -5,7 +5,7 @@
 ## Contributors
 
 - Andreas Einwiller
-- Nils Grefkes
+- MrGref
 
 ## License & copyright
 
