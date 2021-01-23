@@ -2,6 +2,8 @@
 
 **Version 1.0.0**
 
+![preview](png/preview.png)
+
 ## Contributors
 
 - Andreas Einwiller
