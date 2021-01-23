@@ -1,12 +1,12 @@
 versioninfo
 {
-	"editorversion" "400"
+	"editoversion" "400"
 	"editorbuild" "8456"
-	"mapversion" "6"
+	"mapversion" "5"
 	"formatversion" "100"
 	"prefab" "0"
 }
-visgroups
+visgroup
 {
 }
 viewsettings
@@ -20,13 +20,12 @@ viewsettings
 world
 {
 	"id" "1"
-	"mapversion" "6"
+	"mapversion" "1"
 	"classname" "worldspawn"
 	"detailmaterial" "detail/detailsprites"
 	"idetailvbspd" "detail.vbsp"
 	"maxpropscreenwidth" "-1"
 	"skyname" "sky_dust"
-	"detailvbsp" "detail.vbsp"
 	solid
 	{
 		"id" "1"
@@ -38940,7 +38939,7 @@ world
 		}
 	}
 }
-cameras
+camera
 {
 	"activecamera" "-1"
 }
