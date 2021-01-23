@@ -1,10 +1,6 @@
 import numpy as np
 from sympy import prime
 
-id_solid = 1
-id_plane = 1
-vmf = None
-
 
 class Vertex(object):
     def __init__(self, x: int, y: int, z: int):
@@ -17,10 +13,11 @@ class Vertex(object):
 
 
 class Plane(object):
+    id = 1
+
     def __init__(self, v1: Vertex, v2: Vertex, v3: Vertex):
-        global id_plane
-        self.id = id_plane
-        id_plane += 1
+        self.id = Plane.id
+        Plane.id += 1
         self.vertices = [v1, v2, v3]
         self.material = "TOOLS/TOOLSNODRAW"
         self.uaxis = '[1 0 0 0] 0.25'
@@ -59,10 +56,11 @@ class Editor(object):
 
 
 class Solid(object):
+    id = 1
+
     def __init__(self, p1: Plane, p2: Plane, p3: Plane, p4: Plane, p5: Plane, p6: Plane):
-        global id_solid
-        self.id = id_solid
-        id_solid += 1
+        self.id = Solid.id
+        Solid.id += 1
         self.planes = [p1, p2, p3, p4, p5, p6]
         self.editor = Editor()
 
@@ -201,8 +199,7 @@ def longdong(t: float, a: float) -> tuple[int, int]:
     return (int(x), int(y))
 
 
-def alg_nils():
-    global vmf
+def alg_nils(vmf: Vmf):
     # cfg
     n = 100
     a = 2**10
@@ -227,8 +224,7 @@ class Polar(object):
         self.y = int(r * np.sin(np.degrees(phi)))
 
 
-def alg_prime_spiral():
-    global vmf
+def alg_prime_spiral(vmf: Vmf):
     # cfg
     prime_start = 16
     prime_range = 512
@@ -249,11 +245,10 @@ def alg_prime_spiral():
 
 
 def execute():
-    global vmf
     vmf = Vmf()
     #####
-    alg_prime_spiral()
-    # alg_nils()
+    alg_prime_spiral(vmf)
+    # alg_nils(vmf)
     #####
     f = open('output.vmf', 'r+')
     f.truncate(0)
