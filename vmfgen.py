@@ -1,5 +1,6 @@
 import numpy as np
 from sympy import prime
+import matplotlib.pyplot as plt
 
 
 class Vertex(object):
@@ -15,11 +16,11 @@ class Vertex(object):
 class Plane(object):
     id = 1
 
-    def __init__(self, v1: Vertex, v2: Vertex, v3: Vertex):
+    def __init__(self, v1: Vertex, v2: Vertex, v3: Vertex, material="TOOLS/TOOLSNODRAW"):
         self.id = Plane.id
         Plane.id += 1
         self.vertices = [v1, v2, v3]
-        self.material = "TOOLS/TOOLSNODRAW"
+        self.material = material
         self.uaxis = '[1 0 0 0] 0.25'
         self.vaxis = '[0 -1 0 0] 0.25'
         self.rotation = 0
@@ -85,7 +86,7 @@ class Vmf(object):
         self.maxpropscreenwidth = -1
         self.skyname = 'sky_dust'
 
-    def gen_solid(self, centre: Vertex, xr: int, yr: int, zr: int) -> Solid:
+    def gen_solid(self, centre: Vertex, xr: int, yr: int, zr: int, material="TOOLS/TOOLSNODRAW") -> Solid:
         v1 = Vertex(centre.x-int(xr/2), centre.y+int(yr/2),
                     centre.z+int(zr/2))  # up-back-left
         v2 = Vertex(centre.x-int(xr/2)+xr, centre.y+int(yr/2),
@@ -102,19 +103,19 @@ class Vmf(object):
                     centre.z+int(zr/2)-zr)  # down-front-left
         v8 = Vertex(centre.x-int(xr/2)+xr, centre.y+int(yr/2)-yr,
                     centre.z+int(zr/2)-zr)  # down-front-right
-        p1 = Plane(v1, v2, v4)  # up
-        p2 = Plane(v7, v8, v6)  # down
-        p3 = Plane(v1, v3, v7)  # left
-        p4 = Plane(v6, v8, v4)  # right
-        p5 = Plane(v2, v1, v5)  # back
-        p6 = Plane(v8, v7, v3)  # front
+        p1 = Plane(v1, v2, v4, material)  # up
+        p2 = Plane(v7, v8, v6, material)  # down
+        p3 = Plane(v1, v3, v7, material)  # left
+        p4 = Plane(v6, v8, v4, material)  # right
+        p5 = Plane(v2, v1, v5, material)  # back
+        p6 = Plane(v8, v7, v3, material)  # front
         return Solid(p1, p2, p3, p4, p5, p6)
 
-    def add_solid(self, centre: Vertex, xr: int, yr: int, zr: int):
-        solid_check = self.gen_solid(centre, xr, yr, zr)
+    def add_solid(self, centre: Vertex, xr: int, yr: int, zr: int, material="TOOLS/TOOLSNODRAW"):
+        solid_evaluate = self.gen_solid(centre, xr, yr, zr, material)
         # TODO check for collisions
         if (True):
-            self.solids.append(solid_check)
+            self.solids.append(solid_evaluate)
 
     def get_pre_string(self):
         # versioninfo
@@ -226,28 +227,115 @@ class Polar(object):
 
 def alg_prime_spiral(vmf: Vmf):
     # cfg
-    prime_start = 16
-    prime_range = 512
+    texture_t1 = "realworldtextures2/concrete/concrete_37"
+    texture_t2 = "realworldtextures2/concrete/concrete_38"
+    prime_start = 24
+    prime_range = 256
     xrange = 32
     yrange = 32
     zrange = 8
     z = 0
-    z_inc = 4
+    z_inc = 2
     # prime numbers
     p_list = []
     for i in range(prime_start, prime_range+prime_start):
         p_list.append(prime(i))
     # gen solids
+    index = 1
     for p in p_list:
         polar = Polar(p, p)
-        vmf.add_solid(Vertex(polar.x, polar.y, z), xrange, yrange, zrange)
+        if (index % 2 == 0):
+            c = texture_t1
+        else:
+            c = texture_t2
+        vmf.add_solid(Vertex(polar.x, polar.y, z), xrange, yrange, zrange, c)
         z += z_inc
+        index += 1
+
+
+def lerp(a, b, x):
+    # linear interpolation
+    return a + x * (b - a)
+
+
+def fade(t):
+    # 6t^5 -15t^4 +10t^3
+    return 6 * t ** 5 - 15 * t ** 4 + 10 * t ** 3
+
+
+def gradient(h, x, y):
+    # grad converts h to the right gradient vector and return the dot product with (x,y)
+    vector = np.array([[0, 1], [0, -1], [1, 0], [-1, 0]])
+    g = vector[h % 4]
+    return g[:, :, 0]*x+g[:, :, 1]*y
+
+
+def perlin(x, y, seed=0):
+    # permutation table
+    np.random.seed(seed)
+    p = np.arange(256, dtype=int)
+    np.random.shuffle(p)
+    p = np.stack([p, p]).flatten()
+    # coordinates of the top-left
+    xi = x.astype(int)
+    yi = y.astype(int)
+    # internal coordinates
+    xf = x - xi
+    yf = y - yi
+    # fade factors
+    u = fade(xf)
+    v = fade(yf)
+    # noise components
+    n00 = gradient(p[p[xi] + yi], xf, yf)
+    n01 = gradient(p[p[xi] + yi+1], xf, yf-1)
+    n11 = gradient(p[p[xi+1] + yi+1], xf-1, yf-1)
+    n10 = gradient(p[p[xi + 1] + yi], xf - 1, yf)
+    # combine noises
+    x1 = lerp(n00, n10, u)
+    x2 = lerp(n01, n11, u)
+    return lerp(x1, x2, v)
+
+
+def alg_perlin_noise_grid(vmf: Vmf):
+    # cfg
+    texture_t1 = "REALWORLDTEXTURES2/GROUND/SAND_10"
+    texture_t2 = "REALWORLDTEXTURES/NEWER/1/DIRT_1_02"
+    texture_t3 = "DE_AZTEC/HR_AZTEC/HR_AZTEC_BLEND_GROUNDMUD03-GROUNDROCK04"
+    xrange = 48
+    yrange = 48
+    zrange = 48
+    z_noise_scale = 384
+    gridsize = 75  # ndarray
+    # init noise
+    lin = np.linspace(0, 5, gridsize, endpoint=False)
+    x, y = np.meshgrid(lin, lin)
+    # plt.imshow(perlin(x, y, seed=2), origin='upper')
+    # plt.show()
+    noisegrid = perlin(x, y, seed=2)
+    index_row = 0
+    index_col = 0
+    for row in noisegrid:
+        for ele in row:
+            x = xrange * index_col + xrange / 2
+            y = yrange * index_row - yrange / 2
+            z = ele * z_noise_scale
+            if ele < -0.35:
+                c = texture_t3
+            elif ele > 0.2:
+                c = texture_t1
+            else:
+                c = texture_t2
+            vmf.add_solid(Vertex(x, y, z), xrange, yrange, zrange, c)
+            index_col += 1
+        index_row += 1
+        index_col = 0
 
 
 def execute():
     vmf = Vmf()
     #####
-    alg_prime_spiral(vmf)
+    alg_perlin_noise_grid(vmf)
+    # alg_prime_spiral(vmf)
     # alg_nils(vmf)
     #####
     f = open('output.vmf', 'r+')
