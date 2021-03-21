@@ -1,4 +1,4 @@
-# Generate a vmf file
+# Generate vmf files
 
 **Version 1.0.0**
 
