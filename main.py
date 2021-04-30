@@ -7,13 +7,13 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from mpl_toolkits.mplot3d import Axes3D
 # import function
-from modules.algs import alg_3d_shape
+from modules.shape_3d import alg_shape_3d
 
 
 # requires output.vmf file
 def execute():
     vmf = Vmf()
-    alg_3d_shape(vmf)
+    alg_shape_3d(vmf)
     f = open('output.vmf', 'r+')
     f.truncate(0)
     f.write(str(vmf))

@@ -7,8 +7,8 @@ from mpl_toolkits.mplot3d import Axes3D
 
 def alg_shape_3d(vmf: Vmf):
     # cfg
-    addSolid = True
-    draw = False
+    addSolid = False
+    draw = True
 
     block_xr = 16
     block_yr = 16
