@@ -114,6 +114,10 @@ class Vmf(object):
                 return True
         return False
 
+    def add_displacement(self, todo) -> bool:
+        # todo
+        return True
+
     def get_pre_string(self):
         # versioninfo
         out_str = 'versioninfo\n{\n'

@@ -7,15 +7,15 @@ from mpl_toolkits.mplot3d import Axes3D
 
 def alg_shape_3d(vmf: Vmf):
     # cfg
-    addSolid = False
-    draw = True
+    addSolid = True
+    draw = False
 
-    block_xr = 16
-    block_yr = 16
-    block_zr = 16
-    assert block_xr == block_yr == block_zr
-    dimRange = 4096
-    blockDiffRange = 16
+    block_xr = 96
+    block_yr = 96
+    block_zr = 128
+    assert block_xr == block_yr
+    dimRange = 8192
+    blockDiffRange = 48
     #s1 = 0.01
     #s2 = 0.01
     numberPoints = int(dimRange/(block_xr+blockDiffRange))
@@ -26,7 +26,7 @@ def alg_shape_3d(vmf: Vmf):
     xx, yy = np.meshgrid(X, Y)
     # todo outsource func
     # todo try p60 numpy doc
-    zz = 512*np.sin((0.0006*xx)**2+(0.0004*yy)**2)
+    zz = 192*np.cos((0.0008*xx)**2+8*np.cos(0.0009*yy)**2)
     #zz = (s1*(xx))**2-(s2*(yy))**2
     points = np.vstack((xx.flatten(), yy.flatten(), zz.flatten())).T
 

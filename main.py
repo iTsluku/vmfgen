@@ -7,13 +7,13 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from mpl_toolkits.mplot3d import Axes3D
 # import function
-from modules.shape_3d import alg_shape_3d
+from modules.myon_trace import alg_myon_trace
 
 
 # requires output.vmf file
 def execute():
     vmf = Vmf()
-    alg_shape_3d(vmf)
+    alg_myon_trace(vmf)
     f = open('output.vmf', 'r+')
     f.truncate(0)
     f.write(str(vmf))
